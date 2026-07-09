@@ -2,6 +2,7 @@
 
 [![Release](https://img.shields.io/github/v/release/Flinterpop/ADSBtoCOT?sort=semver)](https://github.com/Flinterpop/ADSBtoCOT/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/Flinterpop/ADSBtoCOT/total)](https://github.com/Flinterpop/ADSBtoCOT/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 C++ apps that connect to a readsb/dump1090 newline-delimited JSON feed
 (e.g. `readsb --net-json-port`), show a live log of received ADS-B
@@ -85,3 +86,7 @@ build\Release\adsbtocot.exe     [adsb_host] [adsb_port] [cot_host] [cot_port] [x
 
 Defaults to `192.168.1.135 30154 239.2.3.1 6969`. Pass `-` as `cot_host`
 for log-only mode with no CoT output.
+
+## License
+
+Released under the [MIT License](LICENSE).
