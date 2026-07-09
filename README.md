@@ -26,7 +26,6 @@ No external dependencies — plain Winsock/BSD sockets, Win32 common
 controls, a minimal JSON field extractor, and a hand-rolled protobuf
 encoder. Reconnects automatically if the feed drops.
 
-![adsbtocot_gui showing the live ADS-B message log](docs/screenshot.png)
 
 ### Screenshots
 <img width="1493" height="696" alt="image" src="https://github.com/user-attachments/assets/10c47a2a-df02-41c7-9eb0-168535e00daa" />
