@@ -605,6 +605,90 @@ void createControls(HWND wnd)
     }
 }
 
+// --- About dialog ------------------------------------------------------------
+// A custom modal window (rather than MessageBox) so it can be sized wide
+// enough to show the license URL on one line.
+
+LRESULT CALLBACK aboutProc(HWND w, UINT m, WPARAM wp, LPARAM lp)
+{
+    switch (m) {
+    case WM_COMMAND:
+        if (LOWORD(wp) == IDOK || LOWORD(wp) == IDCANCEL) {
+            DestroyWindow(w);
+            return 0;
+        }
+        break;
+    case WM_CLOSE:
+        DestroyWindow(w);
+        return 0;
+    }
+    return DefWindowProcW(w, m, wp, lp);
+}
+
+void showAboutDialog(HWND owner)
+{
+    HINSTANCE inst = GetModuleHandleW(nullptr);
+    static bool registered = false;
+    if (!registered) {
+        WNDCLASSW wc{};
+        wc.lpfnWndProc = aboutProc;
+        wc.hInstance = inst;
+        wc.hCursor = LoadCursorW(nullptr, IDC_ARROW);
+        wc.hbrBackground = (HBRUSH)(COLOR_BTNFACE + 1);
+        wc.lpszClassName = L"AdsbAboutWnd";
+        RegisterClassW(&wc);
+        registered = true;
+    }
+
+    const int W = 560, H = 300;                     // wide enough for the URL
+    RECT o;
+    GetWindowRect(owner, &o);
+    int x = o.left + ((o.right - o.left) - W) / 2;
+    int y = o.top + ((o.bottom - o.top) - H) / 2;
+
+    HWND dlg = CreateWindowExW(WS_EX_DLGMODALFRAME, L"AdsbAboutWnd",
+        L"About ADSBtoCOT", WS_POPUP | WS_CAPTION | WS_SYSMENU,
+        x, y, W, H, owner, nullptr, inst, nullptr);
+    if (!dlg) return;
+
+    RECT cr;
+    GetClientRect(dlg, &cr);
+
+    std::wstring about = L"ADSBtoCOT " + widen(ADSBTOCOT_VERSION) +
+        L"\r\n\r\n"
+        L"Bridges an ADSB/dump1090 ADS-B JSON feed to "
+        L"Cursor-on-Target for TAK clients.\r\n\r\n"
+        L"https://github.com/Flinterpop/ADSBtoCOT\r\n\r\n"
+        L"Copyright (c) 2026 B.Graham\r\n"
+        L"Licensed under the MIT License.\r\n"
+        L"https://github.com/Flinterpop/ADSBtoCOT/blob/main/LICENSE";
+
+    HWND st = CreateWindowExW(0, L"STATIC", about.c_str(),
+        WS_CHILD | WS_VISIBLE,
+        16, 14, cr.right - 32, cr.bottom - 68, dlg, nullptr, inst, nullptr);
+    SendMessageW(st, WM_SETFONT, (WPARAM)g_uiFont, TRUE);
+
+    HWND ok = CreateWindowExW(0, L"BUTTON", L"OK",
+        WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_DEFPUSHBUTTON,
+        cr.right - 96, cr.bottom - 42, 80, 26, dlg, (HMENU)IDOK, inst, nullptr);
+    SendMessageW(ok, WM_SETFONT, (WPARAM)g_uiFont, TRUE);
+
+    // Run modally: disable the owner and pump messages until the dialog
+    // closes (feed updates behind it keep flowing via DispatchMessage).
+    EnableWindow(owner, FALSE);
+    ShowWindow(dlg, SW_SHOW);
+    SetFocus(ok);
+    MSG msg;
+    while (IsWindow(dlg) && GetMessageW(&msg, nullptr, 0, 0) > 0) {
+        if (!IsDialogMessageW(dlg, &msg)) {
+            TranslateMessage(&msg);
+            DispatchMessageW(&msg);
+        }
+    }
+    EnableWindow(owner, TRUE);
+    SetForegroundWindow(owner);
+}
+
 LRESULT CALLBACK wndProc(HWND wnd, UINT msg, WPARAM wp, LPARAM lp)
 {
     switch (msg) {
@@ -619,16 +703,7 @@ LRESULT CALLBACK wndProc(HWND wnd, UINT msg, WPARAM wp, LPARAM lp)
     case WM_SYSCOMMAND:
         // Low nibble is reserved by Windows, so mask before comparing.
         if ((wp & 0xFFF0) == SC_ABOUT) {
-            std::wstring about = L"ADSBtoCOT " + widen(ADSBTOCOT_VERSION) +
-                L"\r\n\r\n"
-                L"Bridges a readsb/dump1090 ADS-B JSON feed to "
-                L"Cursor-on-Target for TAK clients.\r\n\r\n"
-                L"https://github.com/Flinterpop/ADSBtoCOT\r\n\r\n"
-                L"Copyright (c) 2026 B.Graham\r\n"
-                L"Licensed under the MIT License.\r\n"
-                L"https://github.com/Flinterpop/ADSBtoCOT/blob/main/LICENSE";
-            MessageBoxW(wnd, about.c_str(), L"About ADSBtoCOT",
-                        MB_OK | MB_ICONINFORMATION);
+            showAboutDialog(wnd);
             return 0;
         }
         break;
