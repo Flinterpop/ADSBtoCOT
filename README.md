@@ -12,18 +12,21 @@ UDP for TAK clients (ATAK/WinTAK/iTAK). Two front-ends share one core:
 - `adsbtocot` — console app.
 - `adsbtocot_gui` — Windows UI: top bar with ADS-B server IP/port and a
   Connect/Disconnect toggle (Enter also triggers it; connecting uses the
-  address in the boxes), output format selector (CoT XML /
-  TAK Protobuf), a Pause button that freezes log scrolling (collection
-  continues), and a track ageout in seconds (default 60; 0 disables).
-  Below, two tabs: **Log** (scrolling message log) and **Tracks** (one row
-  per unique aircraft, updated in place with latest values, message count,
-  last-seen time, and age; tracks not heard from within the ageout window
-  are dropped). Status bar shows connection state, message/CoT/track
-  counters, and the CoT destination.
+  address in the boxes), a CoT output format selector (CoT XML / TAK
+  Protobuf), a send-rate selector (No limit / 1 Hz limit / 1 Hz + fill), a
+  Pause button that freezes log scrolling (collection continues), and a
+  track ageout in seconds (default 60; 0 disables). Below, two tabs:
+  **Log** (scrolling message log) and **Tracks** (one row per unique
+  aircraft, updated in place with latest values, message count, last-seen
+  time, and age; tracks not heard from within the ageout window are
+  dropped). Status bar shows connection state, message/CoT/track counters,
+  and the CoT destination. All settings persist between runs (see below).
 
 No external dependencies — plain Winsock/BSD sockets, Win32 common
 controls, a minimal JSON field extractor, and a hand-rolled protobuf
 encoder. Reconnects automatically if the feed drops.
+
+![adsbtocot_gui showing the live ADS-B message log](docs/screenshot.png)
 
 ## CoT output
 
@@ -32,11 +35,11 @@ encoder. Reconnects automatically if the feed drops.
   pass `proto` as the console app's 5th argument.
 - Default destination is the standard TAK mesh SA multicast group
   `239.2.3.1:6969`; any unicast host:port works too.
-- **Send rate** (GUI "Rate:" selector, default "1 Hz"):
+- **Send rate** (GUI "Rate:" selector, default "1 Hz limit"):
   - *No limit* — forward every ADS-B message that has a position (1 in /
     1 out); highest traffic.
-  - *1 Hz* — at most one CoT event per aircraft per second, matching the
-    update rate TAK clients expect.
+  - *1 Hz limit* — at most one CoT event per aircraft per second, matching
+    the update rate TAK clients expect.
   - *1 Hz + fill* — like 1 Hz, but when an aircraft goes a full second with
     no fresh message its last position is re-sent as a fill heartbeat, so
     every active track updates at a steady 1 Hz (fills stop after 60 s of
@@ -49,8 +52,8 @@ encoder. Reconnects automatically if the feed drops.
   code), geometric altitude as HAE in meters, course/speed, and squawk in
   remarks. Emitter category maps to the CoT type (rotorcraft → `a-n-A-C-H`,
   lighter-than-air → `a-n-A-C-L`, otherwise fixed wing `a-n-A-C-F`).
-- Sends are throttled to one event per aircraft per second; events go stale
-  after 120 seconds.
+- Rate limiting follows the selected send rate (above); CoT events go stale
+  120 seconds after they are sent.
 - Records without a position are logged but not forwarded.
 
 ## Settings

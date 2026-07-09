@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Added the MIT license.
+- Documentation: README screenshot, release/downloads/license badges, and a
+  Releases section; corrected the send-rate option name ("1 Hz limit") and
+  clarified that rate limiting depends on the selected send-rate mode.
+
 ## 1.0.0 — 2026-07-08
 
 First release.
