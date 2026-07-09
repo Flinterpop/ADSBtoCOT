@@ -30,6 +30,7 @@ encoder. Reconnects automatically if the feed drops.
 
 ### Screenshots
 <img width="1493" height="696" alt="image" src="https://github.com/user-attachments/assets/10c47a2a-df02-41c7-9eb0-168535e00daa" />
+
 <img width="1493" height="696" alt="image" src="https://github.com/user-attachments/assets/c2190039-90e4-4e8f-acb1-6ce1a422c47a" />
 
 
