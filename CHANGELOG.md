@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- GUI: tooltips on every top-bar control (server host/port, Connect, output
+  format, Pause, ageout, rate) and the tab strip, explaining each function.
+- GUI: an "About ADSBtoCOT" item added to the window (system) menu, opening
+  an About dialog with version and project link.
+- Build: compile MSVC sources with `/utf-8` so non-ASCII characters in
+  labels and tooltips render correctly.
 - Added the MIT license.
 - Documentation: README screenshot, release/downloads/license badges, and a
   Releases section; corrected the send-rate option name ("1 Hz limit") and

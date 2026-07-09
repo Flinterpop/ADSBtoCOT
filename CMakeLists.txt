@@ -4,6 +4,12 @@ project(adsbtocot VERSION 1.0.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Sources are UTF-8; tell MSVC so wide literals with “…”, em dashes, etc.
+# compile to the right code points instead of mojibake.
+if(MSVC)
+    add_compile_options(/utf-8)
+endif()
+
 add_compile_definitions(ADSBTOCOT_VERSION="${PROJECT_VERSION}")
 
 add_library(adsb_core STATIC src/adsb_core.cpp)

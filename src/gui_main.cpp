@@ -47,6 +47,9 @@ constexpr int ID_TAB         = 15;
 constexpr int ID_EDIT_AGEOUT = 16;
 constexpr int ID_CMB_RATE    = 17;
 constexpr int TIMER_AGE      = 1;
+// Custom command for the window (system) menu. Must be < 0xF000 and a
+// multiple of 16 — Windows reserves the low nibble of WM_SYSCOMMAND wParam.
+constexpr int SC_ABOUT       = 0x9010;
 
 constexpr int COL_TRK_MSGS = 10;
 constexpr int COL_TRK_LAST = 11;
@@ -512,6 +515,30 @@ void createControls(HWND wnd)
                    g_btnPause, g_editAgeout, g_cmbRate})
         SendMessageW(h, WM_SETFONT, (WPARAM)g_uiFont, TRUE);
 
+    addTooltip(g_editHost,
+        L"ADS-B server address — the host running the readsb/dump1090 "
+        L"JSON feed (IP or hostname). Editable while disconnected; click "
+        L"Connect to apply.");
+    addTooltip(g_editPort,
+        L"TCP port of the ADS-B JSON feed (e.g. readsb --net-json-port, "
+        L"typically 30154). Editable while disconnected.");
+    addTooltip(g_btnConnect,
+        L"Connect to / disconnect from the ADS-B server at the address "
+        L"above. Enter also triggers it. While connected the address boxes "
+        L"are read-only — disconnect to change them.");
+    addTooltip(g_cmbFormat,
+        L"CoT wire format sent to TAK clients.\r\n\r\n"
+        L"CoT XML: plain-text Cursor-on-Target events.\r\n\r\n"
+        L"TAK Protobuf: TAK Protocol Version 1 mesh protobuf — more "
+        L"compact. Switchable live; no reconnect needed.");
+    addTooltip(g_btnPause,
+        L"Pause / resume auto-scrolling of the Log tab. While paused the "
+        L"log stays put for reading; messages keep arriving and CoT keeps "
+        L"sending. Resume jumps back to the newest row.");
+    addTooltip(g_editAgeout,
+        L"Track ageout in seconds. A track that goes this long without a "
+        L"message is dropped from the Tracks tab (its Age column counts the "
+        L"seconds since it was last heard). Set 0 to keep tracks forever.");
     addTooltip(g_cmbRate,
         L"CoT send rate per aircraft.\r\n\r\n"
         L"No limit: forward every ADS-B message that has a position "
@@ -534,6 +561,10 @@ void createControls(HWND wnd)
     TabCtrl_InsertItem(g_tab, 0, &tie);
     tie.pszText = const_cast<wchar_t*>(L"Tracks");
     TabCtrl_InsertItem(g_tab, 1, &tie);
+    addTooltip(g_tab,
+        L"Log: every received ADS-B message in arrival order (with its CoT "
+        L"status).\r\nTracks: one row per unique aircraft, updated in place, "
+        L"with message count, last-seen time, and age.");
 
     // --- log tab ------------------------------------------------------------
     g_logList = makeListView(wnd, inst, 1);
@@ -565,6 +596,13 @@ void createControls(HWND wnd)
     SendMessageW(g_statusBar, SB_SETTEXT, 0, (LPARAM)L"starting...");
     updateDestLabel();
     updateCounters();
+
+    // Add an "About" item to the window (system) menu — the one with
+    // Restore / Move / Size / Minimize / Maximize / Close.
+    if (HMENU sysMenu = GetSystemMenu(wnd, FALSE)) {
+        AppendMenuW(sysMenu, MF_SEPARATOR, 0, nullptr);
+        AppendMenuW(sysMenu, MF_STRING, SC_ABOUT, L"About ADSBtoCOT…");
+    }
 }
 
 LRESULT CALLBACK wndProc(HWND wnd, UINT msg, WPARAM wp, LPARAM lp)
@@ -577,6 +615,20 @@ LRESULT CALLBACK wndProc(HWND wnd, UINT msg, WPARAM wp, LPARAM lp)
     case WM_SIZE:
         layout();
         return 0;
+
+    case WM_SYSCOMMAND:
+        // Low nibble is reserved by Windows, so mask before comparing.
+        if ((wp & 0xFFF0) == SC_ABOUT) {
+            std::wstring about = L"ADSBtoCOT " + widen(ADSBTOCOT_VERSION) +
+                L"\r\n\r\n"
+                L"Bridges a readsb/dump1090 ADS-B JSON feed to "
+                L"Cursor-on-Target for TAK clients.\r\n\r\n"
+                L"https://github.com/Flinterpop/ADSBtoCOT";
+            MessageBoxW(wnd, about.c_str(), L"About ADSBtoCOT",
+                        MB_OK | MB_ICONINFORMATION);
+            return 0;
+        }
+        break;
 
     case WM_TIMER:
         if (wp == TIMER_AGE) {
