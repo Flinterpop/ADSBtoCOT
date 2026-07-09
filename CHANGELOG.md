@@ -1,15 +1,16 @@
 # Changelog
 
-## Unreleased
+## 1.1.0 — 2026-07-08
 
 - GUI: tooltips on every top-bar control (server host/port, Connect, output
   format, Pause, ageout, rate) and the tab strip, explaining each function.
-- GUI: an "About ADSBtoCOT" item added to the window (system) menu, opening
-  an About dialog with version and project link.
+- GUI: an "About ADSBtoCOT" item on the window (system) menu opens a custom
+  About dialog with the version, project link, copyright, and a link to the
+  MIT license.
 - Build: compile MSVC sources with `/utf-8` so non-ASCII characters in
   labels and tooltips render correctly.
 - Added the MIT license.
-- Documentation: README screenshot, release/downloads/license badges, and a
+- Documentation: README screenshots, release/downloads/license badges, and a
   Releases section; corrected the send-rate option name ("1 Hz limit") and
   clarified that rate limiting depends on the selected send-rate mode.
 
