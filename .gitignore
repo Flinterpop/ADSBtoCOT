@@ -1,0 +1,12 @@
+# Build output
+/build/
+
+# Release artifacts (attached to GitHub Releases instead of committed)
+/dist/
+
+# Editor / OS cruft
+*.user
+.vs/
+.vscode/
+*.swp
+Thumbs.db
