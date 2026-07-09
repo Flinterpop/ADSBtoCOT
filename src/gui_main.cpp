@@ -623,7 +623,10 @@ LRESULT CALLBACK wndProc(HWND wnd, UINT msg, WPARAM wp, LPARAM lp)
                 L"\r\n\r\n"
                 L"Bridges a readsb/dump1090 ADS-B JSON feed to "
                 L"Cursor-on-Target for TAK clients.\r\n\r\n"
-                L"https://github.com/Flinterpop/ADSBtoCOT";
+                L"https://github.com/Flinterpop/ADSBtoCOT\r\n\r\n"
+                L"Copyright (c) 2026 B.Graham\r\n"
+                L"Licensed under the MIT License.\r\n"
+                L"https://github.com/Flinterpop/ADSBtoCOT/blob/main/LICENSE";
             MessageBoxW(wnd, about.c_str(), L"About ADSBtoCOT",
                         MB_OK | MB_ICONINFORMATION);
             return 0;
